@@ -1,0 +1,363 @@
+---
+title: "KMSA"
+author: "JMH"
+date: "2025-01-18"
+output: html_document
+---
+
+{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# Load necessary packages
+library(survival)
+library(survminer)
+
+# Set working directory (adjust path if needed)
+setwd("/Users/jaanmartenhuik/Documents/stat_andmeteadus")
+
+# Load data
+data <- read.csv("heart_failure_clinical_records_dataset.csv")
+
+Data Preparation and Factor Creation
+
+{r}
+# Convert binary variables to factors with meaningful labels
+data$sex <- factor(data$sex, levels = c(0, 1), labels = c("Female", "Male"))
+data$diabetes <- factor(data$diabetes, levels = c(0, 1), labels = c("No Diabetes", "Diabetes"))
+data$high_blood_pressure <- factor(data$high_blood_pressure, levels = c(0, 1), labels = c("No High BP", "High BP"))
+data$anaemia <- factor(data$anaemia, levels = c(0, 1), labels = c("No Anaemia", "Anaemia"))
+data$smoking <- factor(data$smoking, levels = c(0, 1), labels = c("Non-Smoking", "Smoking"))
+
+# Categorize creatinine phosphokinase (CPK)
+data$cpk_category <- ifelse(data$creatinine_phosphokinase <= 120, "Normal CPK", "High CPK")
+
+# Categorize ejection fraction
+data$ejection_fraction_cat <- cut(
+  data$ejection_fraction,
+  breaks = c(-Inf, 40, 49, Inf),
+  labels = c("EF ≤40", "EF 41–49", "EF ≥50"),
+  right = TRUE
+)
+
+# Categorize serum sodium
+data$serum_sodium_cat <- cut(
+  data$serum_sodium,
+  breaks = c(-Inf, 135, 145, Inf),
+  labels = c("Low Sodium (<135 mEq/L)", 
+             "Normal Sodium (135-145 mEq/L)", 
+             "High Sodium (>145 mEq/L)"),
+  right = FALSE
+)
+
+# Categorize platelet levels
+data$platelet_cat <- cut(
+  data$platelets,
+  breaks = c(-Inf, 150000, 450000, Inf),
+  labels = c("Low Platelets (<150k/mcL)", 
+             "Normal Platelets (150k-450k/mcL)", 
+             "High Platelets (>450k/mcL)"),
+  right = FALSE
+)
+
+# Create a single survival object to use for most analyses
+surv_object <- Surv(time = data$time, event = data$DEATH_EVENT)
+
+
+Kaplan-Meier Survival Curve Stratified by Gender
+
+{r}
+# Fit Kaplan-Meier survival curves
+km_fit_sex <- survfit(surv_object ~ sex, data = data)
+
+# Log-rank test
+log_rank_sex <- survdiff(surv_object ~ sex, data = data)
+print(log_rank_sex)
+
+# Plot Kaplan-Meier curves
+ggsurvplot(
+  km_fit_sex,
+  data = data,
+  pval = TRUE,
+  pval.coord = c(10, 0.5),
+  title = "Kaplan-Meier Survival Curve Stratified by Gender",
+  xlab = "Time (days)",
+  ylab = "Survival Probability",
+  legend.title = "Gender",
+  legend.labs = c("Female", "Male"),
+  ggtheme = theme_bw()
+)
+
+
+Kaplan-Meier Survival Curves by Diabetes Status
+
+{r}
+# Fit Kaplan-Meier survival curves
+km_fit_diabetes <- survfit(surv_object ~ diabetes, data = data)
+
+# Log-rank test
+log_rank_diabetes <- survdiff(surv_object ~ diabetes, data = data)
+print(log_rank_diabetes)
+
+# Plot Kaplan-Meier curves
+ggsurvplot(
+  km_fit_diabetes,
+  data = data,
+  pval = TRUE,
+  pval.coord = c(10, 0.5),
+  title = "Kaplan-Meier Survival Curve Stratified by Diabetes Status",
+  xlab = "Time (days)",
+  ylab = "Survival Probability",
+  legend.title = "Diabetes Status",
+  legend.labs = c("No Diabetes", "Diabetes"),
+  ggtheme = theme_bw()
+)
+
+
+Kaplan-Meier Survival Curves by High Blood Pressure
+
+{r}
+# Fit Kaplan-Meier survival curves
+km_fit_hbp <- survfit(surv_object ~ high_blood_pressure, data = data)
+
+# Log-rank test
+log_rank_hbp <- survdiff(surv_object ~ high_blood_pressure, data = data)
+print(log_rank_hbp)
+
+# Plot Kaplan-Meier curves
+ggsurvplot(
+  km_fit_hbp,
+  data = data,
+  pval = TRUE,
+  pval.coord = c(10, 0.5),
+  title = "HF Patients Survivability Stratified by High Blood Pressure",
+  xlab = "Time (days)",
+  ylab = "Survival Probability",
+  legend.title = "High Blood Pressure",
+  legend.labs = c("No High BP", "High BP"),
+  ggtheme = theme_bw()
+)
+
+
+Kaplan-Meier Survival Curves by High Blood Pressure
+
+{r}
+# Fit Kaplan-Meier survival curves
+km_fit_hbp <- survfit(surv_object ~ high_blood_pressure, data = data)
+
+# Log-rank test
+log_rank_hbp <- survdiff(surv_object ~ high_blood_pressure, data = data)
+print(log_rank_hbp)
+
+# Plot Kaplan-Meier curves
+ggsurvplot(
+  km_fit_hbp,
+  data = data,
+  pval = TRUE,
+  pval.coord = c(10, 0.5),
+  title = "HF Patients Survivability Stratified by High Blood Pressure",
+  xlab = "Time (days)",
+  ylab = "Survival Probability",
+  legend.title = "High Blood Pressure",
+  legend.labs = c("No High BP", "High BP"),
+  ggtheme = theme_bw()
+)
+
+
+Kaplan-Meier Survival Curves by Anaemia
+
+{r}
+# Fit Kaplan-Meier survival curves
+km_fit_anaemia <- survfit(surv_object ~ anaemia, data = data)
+
+# Log-rank test
+log_rank_anaemia <- survdiff(surv_object ~ anaemia, data = data)
+print(log_rank_anaemia)
+
+# Plot Kaplan-Meier curves
+ggsurvplot(
+  km_fit_anaemia,
+  data = data,
+  pval = TRUE,
+  pval.coord = c(10, 0.5),
+  title = "Kaplan-Meier Survival Curve Stratified by Anaemia",
+  xlab = "Time (days)",
+  ylab = "Survival Probability",
+  legend.title = "Anaemia",
+  legend.labs = c("No Anaemia", "Anaemia"),
+  ggtheme = theme_bw()
+)
+
+
+Kaplan-Meier Survival Curves by Smoking Status
+
+{r}
+# Fit Kaplan-Meier survival curves
+km_fit_smoking <- survfit(surv_object ~ smoking, data = data)
+
+# Log-rank test
+log_rank_smoking <- survdiff(surv_object ~ smoking, data = data)
+print(log_rank_smoking)
+
+# Plot Kaplan-Meier curves
+ggsurvplot(
+  km_fit_smoking,
+  data = data,
+  pval = TRUE,
+  pval.coord = c(10, 0.5),
+  title = "Kaplan-Meier Survival Curve Stratified by Smoking",
+  xlab = "Time (days)",
+  ylab = "Survival Probability",
+  legend.title = "Smoking",
+  legend.labs = c("Non-Smoking", "Smoking"),
+  ggtheme = theme_bw()
+)
+
+
+Kaplan-Meier Survival Curves by CPK Levels
+
+{r}
+# Fit Kaplan-Meier survival curves
+km_fit_cpk <- survfit(surv_object ~ cpk_category, data = data)
+
+# Log-rank test
+log_rank_cpk <- survdiff(surv_object ~ cpk_category, data = data)
+print(log_rank_cpk)
+
+# Plot Kaplan-Meier curves
+ggsurvplot(
+  km_fit_cpk,
+  data = data,
+  pval = TRUE,
+  pval.coord = c(10, 0.5),
+  title = "Kaplan-Meier Survival Curve Stratified by CPK Levels",
+  xlab = "Time",
+  ylab = "Survival Probability",
+  legend.title = "CPK Levels",
+  legend.labs = c("High CPK", "Normal CPK"),
+  ggtheme = theme_bw()
+)
+
+
+Kaplan-Meier Survival Analysis by Ejection Fraction Categories
+
+{r}
+# Fit Kaplan-Meier survival curves
+km_fit_ef <- survfit(surv_object ~ ejection_fraction_cat, data = data)
+
+# Log-rank test
+log_rank_ef <- survdiff(surv_object ~ ejection_fraction_cat, data = data)
+print(log_rank_ef)
+
+# Plot Kaplan-Meier curves
+ggsurvplot(
+  km_fit_ef,
+  data = data,
+  pval = TRUE,
+  pval.coord = c(10, 0.5),
+  title = "Kaplan-Meier Survival Curve Stratified by Ejection Fraction",
+  xlab = "Time",
+  ylab = "Survival Probability",
+  legend.title = "Ejection Fraction",
+  legend.labs = c("EF ≤40", "EF 41–49", "EF ≥50"),
+  ggtheme = theme_bw()
+)
+
+
+Kaplan-Meier Survival Analysis by Serum Sodium
+
+{r}
+# Fit Kaplan-Meier survival curves
+km_fit_sodium <- survfit(surv_object ~ serum_sodium_cat, data = data)
+
+# Log-rank test
+log_rank_sodium <- survdiff(surv_object ~ serum_sodium_cat, data = data)
+print(log_rank_sodium)
+
+# Plot Kaplan-Meier curves
+ggsurvplot(
+  km_fit_sodium,
+  data = data,
+  pval = TRUE,
+  pval.coord = c(10, 0.5),
+  title = "Kaplan-Meier Survival Curve Stratified by Serum Sodium Levels",
+  xlab = "Time",
+  ylab = "Survival Probability",
+  legend.title = "Serum Sodium Levels",
+  legend.labs = c("Low Sodium (<135 mEq/L)", 
+                  "Normal Sodium (135-145 mEq/L)", 
+                  "High Sodium (>145 mEq/L)"),
+  ggtheme = theme_bw()
+)
+
+
+Kaplan-Meier Survival Curves by Platelet Levels
+
+{r}
+# Fit Kaplan-Meier survival curves
+km_fit_platelets <- survfit(surv_object ~ platelet_cat, data = data)
+
+# Log-rank test
+log_rank_platelets <- survdiff(surv_object ~ platelet_cat, data = data)
+print(log_rank_platelets)
+
+# Plot Kaplan-Meier curves
+ggsurvplot(
+  km_fit_platelets,
+  data = data,
+  pval = TRUE,
+  pval.coord = c(10, 0.5),
+  title = "Kaplan-Meier Survival Curve Stratified by Platelet Levels",
+  xlab = "Time",
+  ylab = "Survival Probability",
+  legend.title = "Platelet Levels",
+  legend.labs = c("Low Platelets (<150k/mcL)", 
+                  "Normal Platelets (150k-450k/mcL)", 
+                  "High Platelets (>450k/mcL)"),
+  ggtheme = theme_bw()
+)
+
+
+Cox Proportional Hazards Model (Selected Predictors)
+
+{r}
+# Fit a Cox Proportional Hazards model with selected predictors
+cph_model <- coxph(Surv(time, DEATH_EVENT) ~ high_blood_pressure + anaemia + smoking + diabetes, data = data)
+
+# Display the summary of the Cox model
+summary(cph_model)
+
+# Forest plot of hazard ratios
+ggforest(
+  cph_model, 
+  data = data, 
+  main = "Forest Plot of Hazard Ratios", 
+  cpositions = c(0.02, 0.22, 0.4), 
+  fontsize = 0.8
+)
+
+
+Cox Proportional Hazards Model (All Predictors)
+
+{r}
+# Fit a Cox Proportional Hazards model including all predictors
+cph_model_full <- coxph(
+  Surv(time, DEATH_EVENT) ~ 
+    age + anaemia + diabetes + ejection_fraction_cat + 
+    high_blood_pressure + platelet_cat + serum_sodium_cat + 
+    sex + smoking + cpk_category, 
+  data = data
+)
+
+# Display the summary of the Cox model
+summary(cph_model_full)
+
+# Forest plot of adjusted hazard ratios
+ggforest(
+  cph_model_full, 
+  data = data, 
+  main = "Forest Plot of Adjusted Hazard Ratios",
+  cpositions = c(0.02, 0.22, 0.4),
+  fontsize = 0.8
+)
+
+
